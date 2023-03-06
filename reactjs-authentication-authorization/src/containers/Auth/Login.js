@@ -8,8 +8,7 @@ import './Login.scss';
 import { FormattedMessage } from 'react-intl';
 // import { userService } from '../../services/userService';
 import { handleLoginApi } from '../../services/userService';
-import jwt from "jsonwebtoken"
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+import PropsCurrentUser from '../System/PropsCurrentUser';
 
 class Login extends Component {
     constructor(props) {
@@ -19,7 +18,7 @@ class Login extends Component {
             password: '',
             showPassword: false,
             errMessage: '',
-            // token: ''
+            user: {},
         }
     }
 
@@ -51,14 +50,9 @@ class Login extends Component {
                 })
             }
             if (data && data.errCode === 0) {
-                let token = jwt.sign({
-                    email: this.state.username
-                }, 'secret')
-                // localStorage.setItem('token', token)
-                // console.log(localStorage.getItem('token'))
-                this.props.userLoginSuccess(data.user);
+                this.props.userLoginSuccess(data.token);
                 // this.setState({
-                //     errMessage: 'loging success'
+                //     user: data.user
                 // })
                 console.log('loging success');
             }
@@ -86,9 +80,13 @@ class Login extends Component {
     render() {
 
 
+        // console.log('languge: ', this.props.language)
 
         return (
             <div className="login-background">
+                {/* <UserManage
+                    currentUser={this.state.user}
+                /> */}
                 <div className="login-container">
                     <div className="login-content row">
                         <div className="col-12 text-center login-title">Login</div>

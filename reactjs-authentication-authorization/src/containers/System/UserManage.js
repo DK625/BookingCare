@@ -6,7 +6,9 @@ import { getAllUsers, createNewUserService, DeleteUserService, editUserService }
 import ModalUser from './ModalUser';
 import ModalEditUser from './ModalEditUser';
 import { emitter } from "../../utils/emitter";
+import { tokenToString } from 'typescript';
 class UserManage extends Component {
+
 
     constructor(prop) {
         super(prop);
@@ -18,12 +20,19 @@ class UserManage extends Component {
         }
     }
 
+
     async componentDidMount() {
         await this.getAllUsersFromReact();
     }
 
+
     getAllUsersFromReact = async () => {
-        let response = await getAllUsers('ALL');
+        let token = this.props.userInfo;
+        // this.setState({
+        //     arrUsers: user
+        // })
+        // console.log(res)
+        let response = await getAllUsers(token);
         if (response && response.errCode === 0) {
             this.setState({
                 arrUsers: response.users
@@ -32,6 +41,7 @@ class UserManage extends Component {
     }
     // gọi api và lấy dữ liệu từ api về, arrUsers lấy dữ liệu users
 
+
     handleAddNewUser = () => {
         this.setState({
             isOpenModalUser: !this.state.isOpenModalUser
@@ -39,12 +49,15 @@ class UserManage extends Component {
     }
     // toggleUserModal = () => {
 
+
     // }
+
 
     createNewUser = async (data) => {
         try {
             // console.log('show data: ', data);
-            let response = await createNewUserService(data);
+            let token = this.props.userInfo;
+            let response = await createNewUserService(data, token);
             // console.log('show response: ', response);
             if (response && response.message.errCode !== 0) {
                 alert(response.message.errMessage)
@@ -62,7 +75,8 @@ class UserManage extends Component {
     handleDeleteUser = async (user) => {
         try {
             // console.log('show user: ', user);
-            let response = await DeleteUserService(user.id);
+            let token = this.props.userInfo;
+            let response = await DeleteUserService(user.id, token);
             // console.log('show response: ', response);
             if (response && response.message.errCode !== 0) {
                 alert(response.message.errMessage)
@@ -86,7 +100,8 @@ class UserManage extends Component {
     }
     doEditUser = async (user) => {
         try {
-            let res = await editUserService(user);
+            let token = this.props.userInfo;
+            let res = await editUserService(user, token);
             if (res && res.message.errCode === 0) {
                 this.setState({
                     isOpenModalEditUse: false
@@ -100,7 +115,7 @@ class UserManage extends Component {
         }
     }
     render() {
-        // console.log('check render ', this.state)
+        // console.log('check render ', this.props.userInfo)
         let arrUsers = this.state.arrUsers;
         return (
             <div className="users-container">
@@ -150,6 +165,7 @@ class UserManage extends Component {
                                         </td>
                                     </tr>
 
+
                                 )
                             })}
                         </tbody>
@@ -159,16 +175,21 @@ class UserManage extends Component {
         );
     }
 
+
 }
+
 
 const mapStateToProps = state => {
     return {
+        userInfo: state.user.userInfo
     };
 };
+
 
 const mapDispatchToProps = dispatch => {
     return {
     };
 };
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserManage);

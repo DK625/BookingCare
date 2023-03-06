@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 const salt = bcrypt.genSaltSync(10);
 
 
+
+
 let handleUserLogin = (email, password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -11,9 +13,10 @@ let handleUserLogin = (email, password) => {
             if (isExist) {
                 //user already exist
                 let user = await db.User.findOne({
-                    attributes: ['email', 'roleId', 'password'],
+                    attributes: ['id', 'email', 'roleId', 'password'],
                     where: { email: email },
                     raw: true,
+
 
                 });
                 if (user) {
@@ -22,12 +25,16 @@ let handleUserLogin = (email, password) => {
                     let check = await bcrypt.compare(password, user.password);
 
 
+
+
                     // Cách 2: dùng synchronous  (đồng bộ)
                     // let check = bcrypt.compareSync(password, user.password);
+
 
                     if (check) {
                         userData.errCode = 0;
                         userData.errMessage = 'OK';
+
 
                         delete user.password;
                         userData.user = user;
@@ -41,6 +48,7 @@ let handleUserLogin = (email, password) => {
                     userData.errMessage = `User not found`;
                 }
 
+
             } else {
                 //return error
                 userData.errCode = 1;
@@ -52,6 +60,7 @@ let handleUserLogin = (email, password) => {
         }
     })
 }
+
 
 let checkUserEmail = (userEmail) => {
     return new Promise(async (resolve, reject) => {
@@ -65,36 +74,38 @@ let checkUserEmail = (userEmail) => {
                 resolve(false)
             }
 
+
         } catch (e) {
             reject(e)
         }
     })
 }
 
+
 let getAllUsers = (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
             let users = ''
-            users = await db.User.findAll({
-                attributes: {
-                    exclude: ['password']
-                }
-            })
-            // if (userId === 'ALL') {
-            //     users = await db.User.findAll({
-            //         attributes: {
-            //             exclude: ['password']
-            //         }
-            //     })
-            // }
-            // if (userId && userId !== 'ALL') {
-            //     users = await db.User.findOne({
-            //         where: { id: userId },
-            //         attributes: {
-            //             exclude: ['password']
-            //         }
-            //     })
-            // }
+            // users = await db.User.findAll({
+            //     attributes: {
+            //         exclude: ['password']
+            //     }
+            // })
+            if (userId === '0') {
+                users = await db.User.findAll({
+                    attributes: {
+                        exclude: ['password']
+                    }
+                })
+            }
+            if (userId && userId !== '0') {
+                users = await db.User.findAll({
+                    where: { id: userId },
+                    attributes: {
+                        exclude: ['password']
+                    }
+                })
+            }
             resolve(users)
         } catch (e) {
             reject(e);
@@ -113,10 +124,18 @@ let hashUserPassword = (password) => {
 }
 // dùng hasspassword khi cần tạo người dùng
 
-let createNewUser = (data) => {
+
+let createNewUser = (data, currentUserId) => {
     return new Promise(async (resolve, reject) => {
-        try {
+        label: try {
             let check = await checkUserEmail(data.email);
+            if (currentUserId !== 0) {
+                resolve({
+                    errCode: 2,
+                    errMessage: `not allowed to create new user`
+                })
+                break label;
+            }
             if (check === true) {
                 resolve({
                     errCode: 1,
@@ -136,6 +155,7 @@ let createNewUser = (data) => {
                 })
             }
 
+
             resolve({
                 errCode: 0,
                 errMessage: 'OK'
@@ -145,59 +165,87 @@ let createNewUser = (data) => {
         }
     })
 }
-let deleteUser = (userId) => {
+let deleteUser = (userId, currentUserId) => {
     return new Promise(async (resolve, reject) => {
-        let foundUser = await db.User.findOne({
-            where: { id: userId }
-        })
-        if (!foundUser) {
+        if (userId === currentUserId || currentUserId === 0) {
+            let foundUser = await db.User.findOne({
+                where: { id: userId }
+            })
+            if (!foundUser) {
+                resolve({
+                    errCode: 2,
+                    errMessage: `The user isn't exist`
+                })
+            }
+
+
+            await db.User.destroy({
+                where: { id: userId }
+
+
+
+
+            })
+
+
             resolve({
-                errCode: 2,
-                errMessage: `The user isn't exist`
+                errCode: 0,
+                errMessage: `The user is deleted`
             })
         }
-
-
-        await db.User.destroy({
-            where: { id: userId }
-
-
-        })
-
         resolve({
-            errCode: 0,
-            errMessage: `The user is deleted`
+            userId,
+            currentUserId,
+            errCode: 1,
+            errMessage: `not allowed to delete other users`
         })
     })
 }
-let updateUserData = (data) => {
+// if(userId === currentUserId || currentUserId === "0") {
+//     resolve({
+//         errCode: 1,
+//         errMessage: `not allowed to delete other users`
+//     })
+let updateUserData = (data, currentUserId) => {
     return new Promise(async (resolve, reject) => {
-        try {
+        label: try {
             if (!data.id) {
                 resolve({
                     errCode: 2,
                     errMessage: 'Missing required parameters'
                 })
-
             }
-
+            if (currentUserId !== data.id.toString() && currentUserId !== "0") {
+                resolve({
+                    errCode: 3,
+                    errMessage: `not allowed to edit other user`,
+                    // data
+                })
+                break label;
+            }
             let user = await db.User.findOne({
                 where: { id: data.id },
                 raw: false
 
+
             })
+
 
             if (user) {
 
+
                 user.firstName = data.firstName;
 
+
                 user.lastName = data.lastName;
+
 
                 user.address = data.address;
                 await user.save();
                 resolve({
                     errCode: 0,
-                    errMessage: 'Update succeeds'
+                    errMessage: 'Update succeeds',
+                    // data
                 })
             } else {
                 resolve({
@@ -216,5 +264,6 @@ module.exports = {
     createNewUser: createNewUser,
     deleteUser: deleteUser,
     updateUserData: updateUserData
+
 
 }

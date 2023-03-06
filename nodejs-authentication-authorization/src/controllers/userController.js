@@ -5,12 +5,14 @@ let handleLoging = async (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
 
+
     if (!email || !password) {
         return res.status(500).json({
             errCode: 1,
             message: 'Missing inputs parameter!'
         })
     }
+
 
     let userData = await userService.handleUserLogin(email, password)
     //check email exist
@@ -19,16 +21,17 @@ let handleLoging = async (req, res) => {
     // access_token :JWT json web token
     if (userData.errCode === 0) {
         let token = jwt.sign({
-            email: email
+            roleId: userData.user.roleId,
+            id: userData.user.id,
         }, process.env.JWT_ACCESS_KEY,
             { expiresIn: "30d" }
         )
-        res.cookie("accessToken", token, {
-            httpOnly: false,
-            secure: false,
-            path: "/",
-            sameSite: false,
-        });
+        // res.cookie("accessToken", token, {
+        //     httpOnly: false,
+        //     secure: false,
+        //     path: "/",
+        //     sameSite: false,
+        // });
         return res.status(200).json({
             token: token,
             errCode: userData.errCode,
@@ -46,6 +49,7 @@ let handleLoging = async (req, res) => {
     })
 }
 
+
 let handleLogout = async (req, res) => {
     try {
         res.clearCookie("accessToken");
@@ -56,35 +60,52 @@ let handleLogout = async (req, res) => {
     }
 }
 
+
 let handleGetAllUserss = async (req, res) => {
-    try {
-        let id = req.query.id;
-        let users = await userService.getAllUsers(id);
+    let id = req.query.id;
+    if (!id) {
         return res.status(200).json({
-            errCode: 0,
-            errMessage: 'OK',
-            users
+            errCode: 1,
+            errMessage: 'Missing required parameter',
+            users: []
         })
-    } catch (error) {
-        errMessage = 'chua dang nhap'
-        return errMessage
     }
+    let users = await userService.getAllUsers(id);
+    return res.status(200).json({
+        errCode: 0,
+        errMessage: 'OK',
+        users
+    })
 }
 let handleGetAllUsers = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
             // let token = req.header('Authorization')
-            let token = req.cookies.accessToken
+            // let tokens = req.cookies.accessToken
+            let token = req.header('Authorization').split(" ")[1]
             // let token = req.header('Authorization')
-            let email = jwt.verify(token, process.env.JWT_ACCESS_KEY)
-            // res.json('welcom ' + email)
-            let id = req.query.id;
+            let dataUser = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+
+            // let id = req.query.id;
+            let id = dataUser.id.toString();
+            // let role = dataUser.roleId;
+            // if (role === 'admin') id = '0'
+            if (!id) {
+                return res.status(200).json({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter',
+                    users: [],
+                    // message: dataUser.id,
+                    // typeof: typeof(dataUser.id)
+                })
+            }
             let users = await userService.getAllUsers(id);
-            res.status(200).json({
+            return res.status(200).json({
                 errCode: 0,
                 errMessage: 'OK',
                 users,
-                // message: email
+                // id,
+                // typeof: typeof(id)
             })
         } catch (e) {
             res.json('not logged in yet')
@@ -95,13 +116,17 @@ let handleGetAllUsers = async (req, res) => {
 let handleCreateNewUsers = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
-            // let token = req.header('Authorization')
-            let token = req.cookies.accessToken
-            let email = jwt.verify(token, process.env.JWT_ACCESS_KEY)
-            let message = await userService.createNewUser(req.body);
+            // let token = req.cookies.accessToken
+            let token = req.header('Authorization').split(" ")[1]
+            let dataUser = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+            let currentUserId = dataUser.id;
+            let message = await userService.createNewUser(req.body, currentUserId);
             res.status(200).json({
-                email: email,
-                message
+                // email: email,
+                message,
+                // typeof: req.body.data
+                // data: req.body
+                // currentUserId
             });
         } catch (e) {
             res.json('not logged in yet')
@@ -117,18 +142,22 @@ let handleDeleteUsers = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
             // let token = req.header('Authorization')
-            let token = req.cookies.accessToken
-            let email = jwt.verify(token, process.env.JWT_ACCESS_KEY)
+            let token = req.header('Authorization').split(" ")[1]
+            // let token = req.cookies.accessToken
+            let dataUser = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+            // let currentUserId = dataUser.id.toString();
+            let currentUserId = dataUser.id;
             if (!req.body.id) {
                 res.status(200).json({
                     errCode: 1,
                     errMessage: "Missing required parameters!"
                 })
             }
-            let message = await userService.deleteUser(req.body.id);
+            let message = await userService.deleteUser(req.body.id, currentUserId);
             return res.status(200).json({
                 // email,
-                message
+                message,
+                // typeofId: typeof(req.body.id)
             });
         } catch (e) {
             res.json('not logged in yet')
@@ -149,13 +178,13 @@ let handleDeleteUserss = async (req, res) => {
 let handleEditUsers = async (req, res) => {
     return new Promise(async (resolve, reject) => {
         try {
-            // let token = req.header('Authorization')
-            let token = req.cookies.accessToken
-            let email = jwt.verify(token, process.env.JWT_ACCESS_KEY)
+            // let token = req.cookies.accessToken
+            let token = req.header('Authorization').split(" ")[1]
+            let dataUser = jwt.verify(token, process.env.JWT_ACCESS_KEY);
+            let currentUserId = dataUser.id.toString();
             let data = req.body;
-            let message = await userService.updateUserData(data);
+            let message = await userService.updateUserData(data, currentUserId);
             res.status(200).json({
-                email: email,
                 message
             });
         } catch (e) {
