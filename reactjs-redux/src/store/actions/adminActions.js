@@ -1,5 +1,5 @@
 import actionTypes from './actionTypes';
-import { saveDetailDoctorService, getAllDoctors, getTopDoctorHomeService, getAllcodeSevice, createNewUserService, getAllUsers, DeleteUserService, editUserService } from "../../services/userService"
+import { getAllClinic, getAllSpecialty, saveDetailDoctorService, getAllDoctors, getTopDoctorHomeService, getAllcodeSevice, createNewUserService, getAllUsers, DeleteUserService, editUserService } from "../../services/userService"
 import { toast } from "react-toastify";
 
 
@@ -244,9 +244,11 @@ export const saveDetailDoctor = (data) => {
     return async (dispatch, getState) => {
         try {
             let res = await saveDetailDoctorService(data);
+            console.log(res)
             if (res && res.errCode === 0) {
                 toast.success("Save Infor Detail Doctor success!");
                 // toast.success('Save Infor Detail Doctor success!')
+                console.log(res.errCode)
                 dispatch({
                     type: actionTypes.SAVE_DETAIL_DOCTORS_SUCCESS,
                 })
@@ -289,6 +291,50 @@ export const fetchAllScheduleTime = () => {
     }
 }
 
+export const getRequiredDoctorInfor = () => {
+    return async (dispatch, getstate) => {
+        try {
+            dispatch({ type: actionTypes.FETCH_REQUIRED_DOCTOR_INFOR_START });
+            let resPrice = await getAllcodeSevice("PRICE");
+            let resPayment = await getAllcodeSevice("PAYMENT");
+            let resProvince = await getAllcodeSevice("PROVINCE");
+            let resSpecialty = await getAllSpecialty();
+            let resClinic = await getAllClinic();
+
+            if (
+                resPrice && resPrice.errCode === 0
+                && resPayment && resPayment.errCode === 0
+                && resProvince && resProvince.errCode == 0
+                && resSpecialty && resSpecialty.errCode === 0
+                && resClinic && resClinic.errCode === 0
+            ) {
+                let data = {
+                    resPrice: resPrice.data,
+                    resPayment: resPayment.data,
+                    resProvince: resProvince.data,
+                    resSpecialty: resSpecialty.data,
+                    resClinic: resClinic.data
+                };
+                dispatch(fetchRequiredDoctorInforSuccess(data));
+            } else {
+                dispatch(fetchRequiredDoctorInforFailed());
+            }
+        } catch (e) {
+            dispatch(fetchRequiredDoctorInforFailed());
+            console.log("fetchGenderStart error", e);
+        }
+    };
+};
+
+export const fetchRequiredDoctorInforSuccess = (allRequiredData) => ({
+    type: actionTypes.FETCH_REQUIRED_DOCTOR_INFOR_SUCCESS,
+    data: allRequiredData
+})
+
+
+export const fetchRequiredDoctorInforFailed = () => ({
+    type: actionTypes.FETCH_REQUIRED_DOCTOR_INFOR_FAIDED
+})
 
 
 
