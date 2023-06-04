@@ -1,0 +1,161 @@
+@import "../styles/common.scss";
+
+.navigator-menu {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    transition: 0.3s;
+
+    &.list-unstyled,
+    .list-unstyled {
+        list-style-type: none;
+    }
+
+    .menu-group {
+        padding: 0 5px;
+        transition: 0.3s;
+        border-radius: 3px;
+
+        i {
+            padding-left: 5px;
+        }
+
+        &:hover {
+            cursor: pointer;
+            color: white;
+            background-color: $colormain;
+        }
+
+        &:hover .menu-group-name {
+            color: white;
+        }
+
+        .menu-group-name {
+            font-weight: 700;
+            line-height: 40px;
+            padding: 0 15px;
+            color: $colormain;
+
+            &:hover {
+                color: white;
+            }
+        }
+
+        .menu-list {
+            border-radius: 5px;
+            border: 0.5px solid $colormain;
+            display: none;
+            background-color: white;
+            box-shadow: 2px 2px 4px 0 $box-shadow-color;
+            -webkit-box-shadow: 2px 2px 4px 0 $box-shadow-color;
+            color: $text-in-light;
+            position: absolute;
+            margin-top: 15px;
+            // transition: 1s;
+            // left: -5px;
+
+            &::before {
+                content: "";
+                border-width: 10px 15px;
+                border-style: solid;
+                border-color: transparent transparent $colormain transparent;
+                position: absolute;
+                left: 12px;
+                top: -20px;
+            }
+
+            .menu {
+                border-radius: 5px;
+                border-bottom: 1px solid $colormain;
+                width: 100%;
+                padding: 0px 15px;
+                height: 35px;
+                line-height: 35px;
+                text-transform: none;
+
+                &.active {
+                    a {
+                        color: white !important;
+                        background-color: $colormain;
+                    }
+
+                    background-color: $colormain;
+                }
+
+                .menu-link {
+                    font-family: 'PlayfairDisplay-Bold';
+                    text-decoration: none;
+                    color: $colormain;
+                    font-weight: 600;
+
+                }
+
+                .sub-menu-list {
+                    display: none;
+                    background-color: $bg-menu-color;
+                    box-shadow: 2px 2px 4px 0 $box-shadow-color;
+                    -webkit-box-shadow: 2px 2px 4px 0 $box-shadow-color;
+                    position: absolute;
+                    top: 0;
+                    left: 205px;
+                    padding: 0;
+
+                    .sub-menu {
+                        padding: 0 15px;
+                        height: 35px;
+                        line-height: 35px;
+                        white-space: nowrap;
+
+                        &:hover {
+                            background-color: darken($bg-menu-color, 5);
+                        }
+
+                        .sub-menu-link {
+                            text-decoration: none;
+                            color: $text-in-light;
+                        }
+
+                        a {
+                            display: block;
+                        }
+
+                        &.active a {
+                            font-weight: 500;
+                            color: $colormain;
+                        }
+                    }
+                }
+
+                &.active span {
+                    font-weight: 500;
+                    color: $colormain;
+                }
+
+                &:hover {
+                    background-color: $colormain;
+
+                    .menu-link {
+                        color: white;
+                    }
+
+                    .sub-menu-list {
+                        display: block;
+                    }
+                }
+
+                .icon-right {
+                    display: block;
+                    position: absolute;
+                    top: 0;
+                    right: 10px;
+                }
+            }
+        }
+
+        &:hover {
+            .menu-list {
+                display: block;
+            }
+        }
+    }
+}

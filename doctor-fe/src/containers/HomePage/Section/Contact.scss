@@ -1,0 +1,25 @@
+.contact{
+    width: 100%;
+    .contact-title{
+        text-align: center;
+        margin: 30px auto;
+        font-size: 50px;
+        letter-spacing: 10px;
+        font-weight: 900;
+    }
+    .contact-content{
+        margin: 20px 15%;
+        display: flex;
+        .info{
+            padding: 50px;
+            width: 50%;
+            b{
+                font-size: 16px;
+            }
+        }
+        iframe{
+            width: 50%;
+        }
+    }
+
+}

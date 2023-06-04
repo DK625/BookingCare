@@ -1,0 +1,48 @@
+.service{
+    display: flex;
+    flex-direction: column;
+    background-color: #c4f0fd;
+    .service-title{
+        margin: 50px auto;
+        font-size: 100px;
+        letter-spacing: 10px;
+        font-weight: 900;
+        color: #ffffff;
+    }
+    .grid-container{
+        margin: 0 12% 30px;
+        display: grid;
+        grid-template-columns: auto auto auto;
+        gap: 30px;
+        .grid-item{
+            width: 24vw;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 300px;
+            justify-content: center;
+            .layout-icon{
+                i{
+                    font-size: 50px;
+                    padding: 24px;
+                    border: #667bfb solid 12px;
+                    border-radius: 50%;
+
+                    &:hover{
+                        transition: all 500ms ease;
+                        background-color: #5b72ff;
+                        border-color: #c4c8eb;
+                        color: white;
+                    }
+                }
+            }
+
+            .item-title{
+                margin-top: 10px;
+                font-size: 18px;
+                font-weight: 600;
+            }
+        }
+    }
+}

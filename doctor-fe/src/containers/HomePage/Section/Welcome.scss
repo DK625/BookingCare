@@ -1,0 +1,19 @@
+.welcome{
+    display: flex;
+    .welcome-img{
+        margin: 40px 5% 40px 15%;
+        width: 400px;
+        height: 600px;
+        background-size: cover;
+        background-image: url('../../../assets/welcome.png');
+        background-repeat: no-repeat;
+    }
+    .welcome-content{
+        margin: 100px 20px;
+        width: 35%;
+        white-space: pre-wrap;
+        p{
+            margin: 20px 0;
+        }
+    }
+}
